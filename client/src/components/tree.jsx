@@ -10,10 +10,6 @@ const FileTreeNode = ({ fileName, nodes, path, onSelect }) => {
         <>
             <span style={{ display: 'flex', cursor: 'pointer' }}
             onClick={(e) => {
-                if(isDir) {
-                    alert('This is a directory');
-                    return;
-                }
                 e.stopPropagation();
                 onSelect(path);
             }}

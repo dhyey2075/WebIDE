@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const socket = io('https://vjl80p28-9000.inc1.devtunnels.ms/');
+const socket = io(import.meta.env.VITE_BASE_URL);
 
 export default socket;
 
