@@ -5,10 +5,13 @@ import './App.css'
 import socket from './socket'
 import AceEditor from 'react-ace'
 import path from 'path'
+import { useResizable } from 'react-resizable-layout';
 
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
+import { use } from 'react'
+import DarkCodeEditor from './components/codeEditor'
 
 function App() {
 
@@ -23,6 +26,11 @@ function App() {
     console.log(data)
     setFileTree(data.tree)
   }
+
+  useEffect(() => {
+    console.log('starting container')
+    socket.emit('start:container', { 'username': 'hh' });
+  }, [])
 
   useEffect(() => {
     console.log('fetching file tree')
@@ -80,7 +88,7 @@ function App() {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault(); // Prevent the browser's default save dialog
       console.log('Save shortcut pressed');
-      
+
       const cleanContent = fileContent.replace(/\x00/g, ''); // Remove null bytes
       socket.emit('file:save', { pt: selectedFile, content: fileContent })
       console.log('file saved')
@@ -98,16 +106,16 @@ function App() {
     };
   }, []);
 
-  const runCode = async() => {
+  const runCode = async () => {
     const ext = selectedFile.split('.')[1];
     const modifiedPath = selectedFile.replaceAll("/", "\\");
     // console.log(path2.cwd, modifiedPath);
 
-    
+
     const data = await fetch(`${import.meta.env.VITE_BASE_URL}/getcwd`);
     const cwd = await data.json();
     console.log(selectedFile.slice(1))
-    
+
     if (ext === 'js') {
       socket.emit('terminal:write', `node ${cwd.cwd}/${selectedFile.slice(1)} \n`);
 
@@ -127,6 +135,12 @@ function App() {
       console.log('Unsupported file type');
     }
   }
+  const { position: leftWidth, separatorProps } = useResizable({
+    axis: 'x',
+    initial: 300, // Initial width of the left pane
+    min: 150, // Minimum width of the left pane
+    max: 800, // Maximum width of the left pane
+  });
 
   return (
     <>
@@ -145,7 +159,7 @@ function App() {
                 <h5>{isSaved ? "Saved ✓" : "Unsaved ✗"}</h5>
               </div>
             </div>
-            <AceEditor
+            {/* <AceEditor
               value={fileContent}
               onChange={(value) => setFileContent(value)}
               theme="monokai"
@@ -158,7 +172,12 @@ function App() {
               }}
               width="100%"
               height="calc(100% - 40px)"
-            />
+            /> */}
+            <DarkCodeEditor 
+              fileContent = {fileContent}
+              setFileContent = {setFileContent}
+             />
+            
           </div>
         </div>
         <div className="Terminal">
